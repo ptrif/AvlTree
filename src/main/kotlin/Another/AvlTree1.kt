@@ -6,9 +6,7 @@ import kotlin.math.max
 
 class AVLTree<T : Comparable<T>> : Iterable<T> {
 
-
     var root: Node? = null
-
 
     inner class Node(var value: T) : TreePrinter.PrintableNode {
 
@@ -17,39 +15,17 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
 
         override var left: Node? = null
         override var right: Node? = null
-        override var text: String = value.toString()
+        override val text: String = value.toString()
 
     }
 
     var nodeCounter = 0 //needed for iterator, that is needed for Printer
 
-
-    fun contains(value: T): Boolean {
-        return contains(root, value)
-    }
-
-    // searches for node
-    fun contains(node: Node?, value: T): Boolean {
-
-        if (node == null)
-            return false
-
-        val cmp = value.compareTo(node.value)
-
-        return when {
-            cmp < 0 -> contains(node.left, value)
-            cmp > 0 -> contains(node.right, value)
-            else -> true
-        }
-
-    }
-
-
     fun insert(value: T?): Boolean {
         return when {
             value == null -> false
-            !contains(root, value) -> {
-                root = insert(root, value)
+            !contains(value) -> {
+                root = insert(root, value) //исправить
                 nodeCounter++
                 true
             }
@@ -57,7 +33,7 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
         }
     }
 
-    fun insert(node: Node?, value: T): Node {
+    private fun insert(node: Node?, value: T): Node {
 
         if (node == null)
             return Node(value)
@@ -74,13 +50,12 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
     }
 
 
-    // boolean remove, as wished
     fun remove(elem: T?): Boolean {
         var result = false
         if (elem == null)
             return result
 
-        if (contains(root, elem)) {
+        if (contains(elem)) {
             root = remove(root, elem)
             nodeCounter--
             result = true
@@ -89,20 +64,46 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
         return result
     }
 
-    fun remove(node: Node?, elem: T): Node? {
+    private fun remove(node: Node?, elem: T): Node? {
+        if (node == null) return null
 
-        if (node == null)
-            return null
+        val cmp = elem.compareTo(node.value)
 
-        val comparable = elem.compareTo(node.value)
+        if (cmp < 0) {
+            node.left = remove(node.left, elem)
 
-        when {
-            comparable < 0 -> node.left = remove(node.left, elem)
-            comparable > 0 -> node.right = remove(node.right, elem)
-            else ->
-                when {
-                    node.left == null -> return node.right //right subtree, swap removeable with its right child
-                    node.right == null -> return node.left // same but left
+        } else if (cmp > 0) {
+            node.right = remove(node.right, elem)
+
+        } else {
+
+            if (node.left == null) {
+                return node.right
+
+            } else
+                if (node.right == null) {
+                    return node.left
+
+                } else if (node.left != null && node.right != null) {
+
+                    val elToStay = node.left
+                    if (node.right!!.left == null) {
+                        node.right!!.left = elToStay
+                        return node.right
+
+                    }
+                    /*
+                    else if (elem == root!!.value) { //not sure how to delete root and not to lose half of the tree
+
+                        val stayEl = findMin(node.left!!)
+                        print(stayEl)
+                        root!!.value = stayEl
+                        print(root!!.value)
+
+}
+
+                     */
+
 
                 }
         }
@@ -111,47 +112,62 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
         return balance(node)
     }
 
-    fun update(node: Node) {
-        var leftNodeHeight = 0
-        var rightNodeHeight = 0
+    fun contains(elem: T): Boolean {
+        val closest = find(elem)
+        return closest != null && elem.compareTo(closest.value) == 0
+    }
 
-        when {
-            node.left == null -> leftNodeHeight = -1
-            else -> node.left!!.height
+    // searches for node
+    private fun find(value: T): Node? =
+        root?.let { find(it, value) }
+
+    private fun find(node: Node?, value: T): Node? {
+
+        if (node == null)
+            return node
+
+        val cmp = value.compareTo(node.value)
+
+        return when {
+            cmp < 0 -> node.left?.let { find(it, value) } ?: node
+            cmp > 0 -> node.right?.let { find(it, value) } ?: node
+            else -> node
         }
 
-        when {
-            node.right == null -> rightNodeHeight = -1
-            else -> node.right!!.height
-        }
+    }
+
+    private fun update(node: Node) {
+
+        val leftNodeHeight = if (node.left == null) -1 else node.left!!.height
+        val rightNodeHeight = if (node.right == null) -1 else node.right!!.height
 
         node.height = 1 + max(leftNodeHeight, rightNodeHeight)
         node.balanceFactor = rightNodeHeight - leftNodeHeight
+
     }
 
 
-    fun balance(node: Node): Node { // problemes! нужно добавить условие чтобы учитывался вес сабтри
-        // что-то с ротациями
+    private fun balance(node: Node): Node {
 
         return when {
             node.balanceFactor == -2 ->
 
                 if (node.left!!.balanceFactor <= 0) {
-                    //rightRotation(node)
-                    leftRotation(node)
+                    rightRotation(node)
+
                 } else {
-                    //bigRightRotation(node)
-                    bigLeftRotation(node)
+                    bigRightRotation(node)
                 }
 
             node.balanceFactor == +2 ->
 
                 if (node.right!!.balanceFactor >= 0) {
-                    // leftRotation(node)
-                    rightRotation(node)
+                    leftRotation(node)
+
+
                 } else {
-                    // bigLeftRotation(node)
-                    bigRightRotation(node)
+                    bigLeftRotation(node)
+
                 }
 
             else -> node
@@ -159,8 +175,7 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
     }
 
 
-    // Check rotations, might be mistake with names
-    fun leftRotation(node: Node): Node {
+    private fun leftRotation(node: Node): Node {
         val newParent = node.right
         node.right = newParent!!.left
         newParent.left = node
@@ -169,7 +184,7 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
         return newParent
     }
 
-    fun rightRotation(node: Node): Node {
+    private fun rightRotation(node: Node): Node {
         val newParent = node.left
         node.left = newParent!!.right
         newParent.right = node
@@ -178,12 +193,12 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
         return newParent
     }
 
-    fun bigLeftRotation(node: Node): Node {
+    private fun bigLeftRotation(node: Node): Node {
         node.right = rightRotation(node.right!!)
         return leftRotation(node)
     }
 
-    fun bigRightRotation(node: Node): Node {
+    private fun bigRightRotation(node: Node): Node {
         node.left = leftRotation(node.left!!)
         return rightRotation(node)
     }
@@ -231,7 +246,7 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
 
     }
 
-    fun checkInvariant(node: Node?): Boolean {
+   internal fun checkInvariant(node: Node?): Boolean {
         if (node == null)
             return true
         val check = node.value

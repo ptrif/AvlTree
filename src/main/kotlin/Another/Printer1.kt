@@ -12,7 +12,7 @@ class TreePrinter {
 
         val left: PrintableNode?
         val right: PrintableNode?
-        var text: String
+        val text: String
 
     }
 
