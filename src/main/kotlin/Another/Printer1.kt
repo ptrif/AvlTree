@@ -16,6 +16,7 @@ class TreePrinter {
 
     }
 
+
     // Print a binary tree.
     fun getTreeDisplay(root: PrintableNode?): String {
 

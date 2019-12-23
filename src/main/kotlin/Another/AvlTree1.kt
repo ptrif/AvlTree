@@ -8,10 +8,12 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
 
     var root: Node? = null
 
+
     inner class Node(var value: T) : TreePrinter.PrintableNode {
 
         var balanceFactor: Int = 0
         var height: Int = 0
+
 
         override var left: Node? = null
         override var right: Node? = null
@@ -19,18 +21,20 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
 
     }
 
+
     var nodeCounter = 0 //needed for iterator, that is needed for Printer
 
+
     fun insert(value: T?): Boolean {
-        return when {
-            value == null -> false
-            !contains(value) -> {
-                root = insert(root, value) //исправить
-                nodeCounter++
-                true
-            }
-            else -> false
-        }
+
+        return if (value != null && !contains(value)) {
+            root = insert(root, value)
+            balance(find(value)!!)
+            nodeCounter++
+            true
+        } else
+            false
+
     }
 
     private fun insert(node: Node?, value: T): Node {
@@ -49,68 +53,103 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
         return balance(node)
     }
 
+    /*
 
     fun remove(elem: T?): Boolean {
-        var result = false
-        if (elem == null)
-            return result
 
-        if (contains(elem)) {
+        return if (elem != null && contains(elem)) {
             root = remove(root, elem)
             nodeCounter--
-            result = true
-        }
+            true
+        } else
+            false
 
-        return result
     }
 
-    private fun remove(node: Node?, elem: T): Node? {
-        if (node == null) return null
+     */
+    private var isLeftChild: Boolean = false
 
-        val cmp = elem.compareTo(node.value)
+    fun remove(element: T): Boolean {
+        if (root == null)
+            return false
 
-        if (cmp < 0) {
-            node.left = remove(node.left, elem)
-
-        } else if (cmp > 0) {
-            node.right = remove(node.right, elem)
-
-        } else {
-
-            if (node.left == null) {
-                return node.right
-
-            } else
-                if (node.right == null) {
-                    return node.left
-
-                } else if (node.left != null && node.right != null) {
-
-                    val elToStay = node.left
-                    if (node.right!!.left == null) {
-                        node.right!!.left = elToStay
-                        return node.right
-
-                    }
-                    /*
-                    else if (elem == root!!.value) { //not sure how to delete root and not to lose half of the tree
-
-                        val stayEl = findMin(node.left!!)
-                        print(stayEl)
-                        root!!.value = stayEl
-                        print(root!!.value)
-
-}
-
-                     */
-
-
+        var parent = root
+        var current = root
+        isLeftChild = true
+        
+        while (current!!.value.compareTo(element) != 0) {
+            parent = current
+            when {
+                current.value > element -> {
+                    isLeftChild = true
+                    current = current.left
                 }
-        }
+                else -> {
+                    isLeftChild = false
+                    current = current.right
+                }
+            }
 
-        update(node)
-        return balance(node)
+            if (current == null)
+                return false
+        }
+        remove(current, parent!!)
+        nodeCounter--
+        return true
     }
+
+    private fun remove(current: Node, parent: Node): Node {
+        when {
+            current.left == null && current.right == null ->
+                when {
+                current == root -> root = null
+                isLeftChild -> parent.left = null
+                else -> parent.right = null
+            }
+            current.left == null ->
+                when {
+                current == root -> root = current.right
+                isLeftChild -> parent.left = current.right
+                else -> parent.right = current.right
+            }
+            current.right == null ->
+                when {
+                current == root -> root = current.left
+                isLeftChild -> parent.left = current.left
+                else -> parent.right = current.left
+            }
+            else -> {
+                val successor = getSuccessor(current)
+                when {
+                    current == root -> root = successor
+                    isLeftChild -> parent.left = successor
+                    else -> parent.right = successor
+                }
+                successor.left = current.left
+            }
+        }
+        update(current)
+        return balance(current)
+
+    }
+//helper for two-links node
+    private fun getSuccessor(node: Node): Node {
+        var parent = node
+        var successor = node
+        var current = node.right
+
+        while (current != null) {
+            parent = successor
+            successor = current
+            current = current.left
+        }
+        if (successor !== node.right) {
+            parent.left = successor.right
+            successor.right = node.right
+        }
+        return successor
+    }
+
 
     fun contains(elem: T): Boolean {
         val closest = find(elem)
@@ -136,6 +175,7 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
 
     }
 
+
     private fun update(node: Node) {
 
         val leftNodeHeight = if (node.left == null) -1 else node.left!!.height
@@ -154,6 +194,7 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
 
                 if (node.left!!.balanceFactor <= 0) {
                     rightRotation(node)
+
 
                 } else {
                     bigRightRotation(node)
@@ -201,6 +242,7 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
     private fun bigRightRotation(node: Node): Node {
         node.left = leftRotation(node.left!!)
         return rightRotation(node)
+
     }
 
 
@@ -246,7 +288,7 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
 
     }
 
-   internal fun checkInvariant(node: Node?): Boolean {
+    internal fun checkInvariant(node: Node?): Boolean {
         if (node == null)
             return true
         val check = node.value
