@@ -7,22 +7,18 @@ import kotlin.math.max
 class AVLTree<T : Comparable<T>> : Iterable<T> {
 
     var root: Node? = null
-
+    var nodeCounter = 0 //needed for iterator, that is needed for Printer
 
     inner class Node(var value: T) : TreePrinter.PrintableNode {
 
         var balanceFactor: Int = 0
         var height: Int = 0
 
-
         override var left: Node? = null
         override var right: Node? = null
         override val text: String = value.toString()
 
     }
-
-
-    var nodeCounter = 0 //needed for iterator, that is needed for Printer
 
 
     fun insert(value: T?): Boolean {
@@ -53,20 +49,7 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
         return balance(node)
     }
 
-    /*
 
-    fun remove(elem: T?): Boolean {
-
-        return if (elem != null && contains(elem)) {
-            root = remove(root, elem)
-            nodeCounter--
-            true
-        } else
-            false
-
-    }
-
-     */
     private var isLeftChild: Boolean = false
 
     fun remove(element: T): Boolean {
@@ -76,7 +59,7 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
         var parent = root
         var current = root
         isLeftChild = true
-        
+
         while (current!!.value.compareTo(element) != 0) {
             parent = current
             when {
@@ -161,7 +144,6 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
         root?.let { find(it, value) }
 
     private fun find(node: Node?, value: T): Node? {
-
         if (node == null)
             return node
 
