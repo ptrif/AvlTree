@@ -176,7 +176,7 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
         child?.parent = node
 
         if (parent == null) {
-            this.root = newNode
+            root = newNode
             newNode?.parent = null
             return newNode
         }
@@ -205,9 +205,9 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
         child?.parent = node
 
         if (parent == null) {
-            this.root = newNode
+            root = newNode
             newNode?.parent = null
-            return newNode
+            return root
         }
 
         newNode?.parent = parent
