@@ -17,6 +17,7 @@ class AVLtests {
         avlTree.add(250)
         avlTree.add(300)
         avlTree.add(12)
+        avlTree.add(13)
         avlTree.add(16)
         avlTree.add(120)
 

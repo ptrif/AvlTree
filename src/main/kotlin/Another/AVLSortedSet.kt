@@ -6,10 +6,12 @@ import kotlin.NoSuchElementException
 import kotlin.collections.AbstractSet
 import kotlin.math.max
 
-class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
+open class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
 
-    private var root: Node<T>? = null
+    var root: Node<T>? = null
 
+    // If we have these limits on the tree elements,
+    // we should use them in iterator(), add(), remove(), ...
     private var fromElement: T? = null
     private var toElement: T? = null
 
@@ -19,44 +21,45 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
         this.toElement = toElement
     }
 
+    private fun range(value: T): Boolean =
+        (fromElement == null || value >= fromElement!!) && (toElement == null || value < toElement!!)
+
+    // Fix this funky var with custom getter and **default** setter
     override var size = 0
         get() {
             var result = 0
             for (i in this)
-                if (sequence(i))
+                if (range(i))
                     result++
             return result
         }
 
+
+
+
     class Node<T>(val value: T) : TreePrinter.PrintableNode {
 
-        var height: Int = 1
+        private var height: Int = 1
 
         override var left: Node<T>? = null
         override var right: Node<T>? = null
         var parent: Node<T>? = null
 
+        private val Node<T>?.height: Int
+            get() = this@height?.height ?: 0
+
         fun update() {
-            height = max((right?.height ?: 0), (left?.height ?: 0)) + 1
+            height = max(right.height, left.height) + 1
         }
 
-        fun getBalanceFactor() = (right?.height ?: 0) - (left?.height ?: 0)
+        fun getBalanceFactor() = right.height - left.height
 
         override val text: String = value.toString()
 
     }
 
-    private fun sequence(value: T): Boolean {
-        var result = false
-        when {
-            (fromElement == null || value >= fromElement!!)
-                    && (toElement == null || value < toElement!!) ->
-                result = true
-        }
-        return result
-    }
-
     override fun add(element: T): Boolean {
+        require(range(element))
         val closest = find(element)
         val cmp = if (closest == null) -1 else element.compareTo(closest.value)
 
@@ -82,15 +85,16 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
             }
         }
         size++
-        newNode.update()
-        balanceTree(root)
-        root?.update()
+        //     newNode.update()
+//        balanceTree(root)
+//        root?.update()
         balanceTree(newNode)
 
         return true
     }
 
     override fun remove(element: T): Boolean {
+        require(range(element))
         val current = find(element)
 
         if (current == null)
@@ -123,7 +127,9 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
 
                 }
             }
-            parent?.update()
+            // parent?.update()
+            // Check whether we need to balance from parent
+            // or from swap or from some other thing
             balanceTree(parent ?: root)
             return true
 
@@ -159,7 +165,7 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
         }
         node.update()
         if (parent != null) {
-            parent.update()
+            // parent.update()
             balanceTree(parent)
         }
 
@@ -178,6 +184,8 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
         if (parent == null) {
             root = newNode
             newNode?.parent = null
+            // Maybe do updates here?
+            //newNode?.update()
             return newNode
         }
 
@@ -187,9 +195,11 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
         else
             parent.right = newNode
 
-        node.update()
+        // Some of these updates are not needed
+        // node.update()
+        // parent.update()
         newNode?.update()
-        root?.update()
+        // root?.update()
         return newNode
 
     }
@@ -207,7 +217,8 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
         if (parent == null) {
             root = newNode
             newNode?.parent = null
-            return root
+            // newNode?.update()
+            return newNode
         }
 
         newNode?.parent = parent
@@ -216,9 +227,9 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
         else
             parent.right = newNode
 
-        node.update()
+        // node.update()
         newNode?.update()
-        root?.update()
+        // root?.update()
         return newNode
     }
 
@@ -267,7 +278,7 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
 
     open inner class BinaryTreeIterator internal constructor() : MutableIterator<T> {
 
-        private val iterator: Queue<Node<T>> = LinkedList()
+        private val iterator: Queue<Node<T>> = ArrayDeque()
         private var current: Node<T>? = null
 
         init {
@@ -296,9 +307,8 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
         }
 
         override fun remove() {
-            remove(current?.value)
-            root?.update()
-            balanceTree(root)
+            if (current == null) return
+            remove(current!!.value)
         }
     }
 
@@ -346,6 +356,24 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
         return elements.all { remove(it) }
     }
 
+    //not sure
+    override fun retainAll(elements: Collection<T>): Boolean {
+        var result = false
+        val marked = mutableListOf<T>()
+        for (node in BinaryTreeIterator()) {
+            if (elements.any { it != node}) {
+                marked += node
+                result = true
+            }
+        }
+        for (node in marked)
+            remove(node)
+        return result
+    }
+
+
+
+    //  Найти множество всех элементов больше или равных заданного
     override fun tailSet(fromElement: T): SortedSet<T> {
         val node = root
         if (node != null) {
@@ -355,6 +383,7 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
         return AVLSortedSet(root, fromElement, null)
     }
 
+    //Найти множество всех элементов меньше заданного
     override fun headSet(toElement: T): SortedSet<T> {
         val node = root
         if (node != null) {
@@ -364,6 +393,7 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
         return AVLSortedSet(root, null, toElement)
     }
 
+    // Найти множество всех элементов в диапазоне [fromElement, toElement)
     override fun subSet(fromElement: T, toElement: T): SortedSet<T> {
         val node = root
         if (node != null) {
@@ -372,10 +402,5 @@ class AVLSortedSet<T : Comparable<T>>() : AbstractSet<T>(), SortedSet<T> {
         }
         return AVLSortedSet(root, fromElement, toElement)
     }
-
-    override fun retainAll(elements: Collection<T>): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
 }
 
