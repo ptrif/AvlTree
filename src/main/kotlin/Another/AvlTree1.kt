@@ -4,6 +4,7 @@ import java.util.*
 import kotlin.math.max
 
 
+/*
 class AVLTree<T : Comparable<T>> : Iterable<T> {
 
     var root: Node? = null
@@ -12,7 +13,8 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
     inner class Node(var value: T) : TreePrinter.PrintableNode {
 
         var balanceFactor: Int = 0
-        var height: Int = 0
+        var height: Int = 1
+
 
         override var left: Node? = null
         override var right: Node? = null
@@ -23,9 +25,13 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
 
     fun insert(value: T?): Boolean {
 
-        return if (value != null && !contains(value)) {
+        return if (value != null) {
             root = insert(root, value)
-            balance(find(value)!!)
+            val node = find(value)
+
+            update(node!!)
+            balance(node)
+
             nodeCounter++
             true
         } else
@@ -81,26 +87,27 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
         return true
     }
 
-    private fun remove(current: Node, parent: Node): Node {
+    private fun remove(current: Node, parent: Node) {
         when {
             current.left == null && current.right == null ->
                 when {
-                current == root -> root = null
-                isLeftChild -> parent.left = null
-                else -> parent.right = null
-            }
+                    current == root -> root = null
+                    isLeftChild -> parent.left = null
+                    else -> parent.right = null
+                }
             current.left == null ->
                 when {
-                current == root -> root = current.right
-                isLeftChild -> parent.left = current.right
-                else -> parent.right = current.right
-            }
+                    current == root -> root = current.right
+                    isLeftChild -> parent.left = current.right
+                    else -> parent.right = current.right
+                }
             current.right == null ->
                 when {
-                current == root -> root = current.left
-                isLeftChild -> parent.left = current.left
-                else -> parent.right = current.left
-            }
+                    current == root -> root = current.left
+                    isLeftChild -> parent.left = current.left
+                    else -> parent.right = current.left
+
+                }
             else -> {
                 val successor = getSuccessor(current)
                 when {
@@ -109,13 +116,15 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
                     else -> parent.right = successor
                 }
                 successor.left = current.left
+                update(successor)
             }
         }
-        update(current)
-        return balance(current)
+       // update(current)
+       // return balance(current)
 
     }
-//helper for two-links node
+
+    //helper for two-links node
     private fun getSuccessor(node: Node): Node {
         var parent = node
         var successor = node
@@ -126,10 +135,11 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
             successor = current
             current = current.left
         }
-        if (successor !== node.right) {
+        if (successor != node.right) {
             parent.left = successor.right
             successor.right = node.right
         }
+        update(successor)
         return successor
     }
 
@@ -158,15 +168,34 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
     }
 
 
-    private fun update(node: Node) {
+    private fun update(node: Node) { //как рекурсивно тебя абдейтить
 
         val leftNodeHeight = if (node.left == null) -1 else node.left!!.height
         val rightNodeHeight = if (node.right == null) -1 else node.right!!.height
 
-        node.height = 1 + max(leftNodeHeight, rightNodeHeight)
+        node.height = 1+ max(leftNodeHeight, rightNodeHeight)
         node.balanceFactor = rightNodeHeight - leftNodeHeight
 
+
+
     }
+
+    private fun recursiveUpdate(node: Node): Int {
+        //return max(node.left!!.height, node.right!!.height)+1
+        return if (node.left == null || node.right == null) {
+            -1
+        } else {
+            max(node.left!!.height, node.right!!.height)+1
+        }
+    }
+    private fun getBalanceValue(node: Node?): Int{
+        if (node==null) {
+            return 0
+        }
+        return (node.right!!.height - node.left!!.height)
+
+    }
+
 
 
     private fun balance(node: Node): Node {
@@ -287,3 +316,8 @@ class AVLTree<T : Comparable<T>> : Iterable<T> {
     }
 
 }
+
+
+ */
+
+

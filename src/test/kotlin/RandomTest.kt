@@ -1,17 +1,17 @@
-import Another.AVLTree
-import Another.TreePrinter
+
+import Another.AVLSortedSet
 import junit.framework.Assert.assertEquals
 import org.junit.Test
 import kotlin.random.Random
 
 class RandomTest {
-    private val avlTree = AVLTree<Int>()
+    private val avlTree = AVLSortedSet<Int>()
 
     @Test
     fun testInsertion() {
         val randomValues = List(10){ Random.nextInt(1,100)}
 
-        randomValues.forEach { avlTree.insert(it) }
+        randomValues.forEach { avlTree.add(it) }
         print(avlTree)
 
         val expected = "        67               \n" +
@@ -23,6 +23,26 @@ class RandomTest {
         assertEquals(expected, avlTree)
 
     }
+
+    @Test
+    fun testRemove(){
+        val insertV = List(6){ Random.nextInt(1,100)}
+        insertV.forEach { avlTree.add(it) }
+        print(avlTree)
+        val removeR = List(3){insertV[Random.nextInt(1,6)]}
+
+        removeR.forEach{avlTree.remove(it)}
+        print(avlTree)
+        val expected = ""
+        assertEquals(expected, avlTree)
+
+
+
+
+    }
+
+
+
 
 
 }

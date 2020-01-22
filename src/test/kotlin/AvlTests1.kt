@@ -1,58 +1,61 @@
-import Another.AVLTree
-import Another.TreePrinter
+import Another.AVLSortedSet
 import junit.framework.Assert.assertEquals
 import org.junit.Test
-import kotlin.random.Random
+
 
 class AVLtests {
-    private val avlTree = AVLTree<Int>()
+    private val avlTree = AVLSortedSet<Int>()
 
     @Test
     fun testInsertion() {
+
         val testValues = arrayOf(8, 67, 167, 14, 15, 1, 89)
 
-
-
-        testValues.forEach { avlTree.insert(it) }
-        //print(avlTree)
-        avlTree.insert(22)
-        avlTree.insert(200)
-        avlTree.insert(250)
-        avlTree.insert(300)
-        avlTree.insert(12)
-        avlTree.insert(13)
-        avlTree.insert(16)
-        avlTree.insert(301)
-        avlTree.insert(120)
+        testValues.forEach { avlTree.add(it) }
+        avlTree.add(22)
+        avlTree.add(200)
+        avlTree.add(250)
+        avlTree.add(300)
+        avlTree.add(12)
+        avlTree.add(16)
+        avlTree.add(120)
 
         print(avlTree)
 
-        val expected = "        67               \n" +
-                "                                \n" +
-                "       14              167      \n" +
-                "                                \n" +
-                "    1      15      89  "
+        val expected =
+                "                               67                               \n" +
+                "                |                               |               \n" +
+                "               14                              167              \n" +
+                "        |               |               |               |       \n" +
+                "        8              16              89              250      \n" +
+                "    |       |       |       |               |       |       |   \n" +
+                "    1      12      15      22              120     200     300  \n"
 
         assertEquals(expected, avlTree)
 
     }
 
     @Test
-    fun testRemoval() { // SOMETHING WRONG HERE!
-        //не удаляет рут и не балансирует
-        val values = arrayOf(89, 100, 68, 57, 11, 85, 116)
+    fun testRemoval() {
 
-        values.forEach { avlTree.insert(it) }
+        val values = arrayOf(89, 100, 68, 57, 11, 65, 85, 116)
+
+        values.forEach { avlTree.add(it) }
 
         print(avlTree)
         avlTree.remove(85)
         avlTree.remove(100)
         avlTree.remove(68)
+        avlTree.remove(65)
 
         print(avlTree)
-        val exp = ""
+        val exp =
+                "               57               \n" +
+                "        |               |       \n" +
+                "       11              89       \n" +
+                "                            |   \n" +
+                "                           116  \n"
         assertEquals(exp, avlTree)
-
 
     }
 
