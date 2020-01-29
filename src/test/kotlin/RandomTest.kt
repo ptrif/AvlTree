@@ -1,11 +1,15 @@
+@file:Suppress("DEPRECATION")
 
 import Another.AVLSortedSet
+import junit.framework.Assert
 import junit.framework.Assert.assertEquals
 import org.junit.Test
+import java.util.*
 import kotlin.random.Random
 
 class RandomTest {
     private val avlTree = AVLSortedSet<Int>()
+    val tree =TreeSet<Int>()
 
     @Test
     fun testInsertion() {
@@ -13,36 +17,60 @@ class RandomTest {
 
         randomValues.forEach { avlTree.add(it) }
         print(avlTree)
-
-        val expected = "        67               \n" +
-                "                                \n" +
-                "       14              167      \n" +
-                "                                \n" +
-                "    1      15      89  "
-
-        assertEquals(expected, avlTree)
+        randomValues.forEach{tree.add(it)}
+        assertEquals(tree, avlTree)
 
     }
 
     @Test
-    fun testRemove(){
-        val insertV = List(6){ Random.nextInt(1,100)}
-        insertV.forEach { avlTree.add(it) }
-        print(avlTree)
-        val removeR = List(3){insertV[Random.nextInt(1,6)]}
+    fun testRemove() {
 
-        removeR.forEach{avlTree.remove(it)}
-        print(avlTree)
-        val expected = ""
-        assertEquals(expected, avlTree)
+        val random = java.util.Random()
+
+        for (i in 0..100) {
+            val addingValues = random.nextInt(100)
+            tree.add(addingValues)
+            avlTree.add(addingValues)
+        }
+
+        for (i in 0..50) {
+            var removeValues = random.nextInt(100)
+
+            while (!tree.contains(removeValues)) {
+                removeValues = random.nextInt(100)
+            }
+            avlTree.remove(removeValues)
+            tree.remove(removeValues)
+            assertEquals(tree.size, avlTree.size)
 
 
-
-
+        }
     }
 
+    @Test
+    fun testContains() {
+        val avlTree = AVLSortedSet<Int>()
+        val random = java.util.Random()
+        val treeSet = TreeSet<Int>()
 
+        for (i in 0..100) {
+            val addingValues = random.nextInt(100)
+            treeSet.add(addingValues)
+            avlTree.add(addingValues)
+        }
 
+        for (i in 0..50) {
+            var values = random.nextInt(100)
+
+            while (!treeSet.contains(values)) {
+                values = random.nextInt(100)
+            }
+
+            Assert.assertTrue(treeSet.contains(values))
+            Assert.assertTrue(avlTree.contains(values))
+
+        }
+    }
 
 
 }
