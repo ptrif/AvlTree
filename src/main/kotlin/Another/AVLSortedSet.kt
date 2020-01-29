@@ -13,35 +13,6 @@ open class AVLSortedSet<T : Comparable<T>> : AbstractSet<T>(), SortedSet<T> {
     var root: Node<T>? = null
     override var size = 0
 
-    private val listOfHeadSet = ArrayList<SubSet>()
-    private val listOfSubSet = ArrayList<SubSet>()
-    private val listOfTailSet = ArrayList<SubSet>()
-
-    fun getHeadSet(index: Int): SubSet {
-        return listOfHeadSet[index]
-    }
-
-    fun getSubSet(index: Int): SubSet {
-        return listOfSubSet[index]
-    }
-
-    fun getTailSet(index: Int): SubSet {
-        return listOfTailSet[index]
-    }
-
-    fun setHeadSet(index: Int, newHead: SubSet): SubSet {
-        return listOfHeadSet.set(index, newHead)
-    }
-
-    fun setSubSet(index: Int, newSub: SubSet): SubSet {
-        return listOfSubSet.set(index, newSub)
-    }
-
-    fun setTailSet(index: Int, newTail: SubSet): SubSet {
-        return listOfTailSet.set(index, newTail)
-    }
-
-
     class Node<T>(val value: T) : TreePrinter.PrintableNode {
 
         private var height: Int = 1
@@ -374,6 +345,34 @@ open class AVLSortedSet<T : Comparable<T>> : AbstractSet<T>(), SortedSet<T> {
         for (node in marked)
             remove(node)
         return result
+    }
+
+    private val listOfHeadSet = ArrayList<SubSet>()
+    private val listOfSubSet = ArrayList<SubSet>()
+    private val listOfTailSet = ArrayList<SubSet>()
+
+    fun getHeadSet(index: Int): SubSet {
+        return listOfHeadSet[index]
+    }
+
+    fun getSubSet(index: Int): SubSet {
+        return listOfSubSet[index]
+    }
+
+    fun getTailSet(index: Int): SubSet {
+        return listOfTailSet[index]
+    }
+
+    fun setHeadSet(index: Int, newHead: SubSet): SubSet {
+        return listOfHeadSet.set(index, newHead)
+    }
+
+    fun setSubSet(index: Int, newSub: SubSet): SubSet {
+        return listOfSubSet.set(index, newSub)
+    }
+
+    fun setTailSet(index: Int, newTail: SubSet): SubSet {
+        return listOfTailSet.set(index, newTail)
     }
 
     //  Найти множество всех элементов больше или равных заданного
